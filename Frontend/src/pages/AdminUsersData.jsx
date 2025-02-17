@@ -11,7 +11,9 @@ export default function AdminUsersData() {
     const [formData, setFormData] = useState({
         username: "",
         email: "",
+        gender: "",
         address: "",
+        city: "",
         role: "",
     });
 
@@ -33,7 +35,9 @@ export default function AdminUsersData() {
         setFormData({
             username: user.username,
             email: user.email,
+            gender: user.gender,
             address: user.address,
+            city: user.city,
             role: user.role,
         });
         setIsModalOpen(true);
@@ -51,17 +55,25 @@ export default function AdminUsersData() {
     };
 
     // Fungsi untuk menyimpan perubahan user
-    const handleSaveChanges = () => {
+    const handleSaveChanges = async () => {
         if (!selectedUser) return;
 
-        axios.put(`http://localhost:5000/api/users/${selectedUser.id}`, formData)
-            .then(response => {
-                setUsers(users.map(user => user.id === selectedUser.id ? response.data : user));
-                closeModal();
-            })
-            .catch(error => {
-                console.error("Gagal memperbarui data:", error);
-            });
+        try {
+            // Kirim perubahan ke server
+            const response = await axios.put(`http://localhost:5000/api/users/${selectedUser.id}`, formData);
+
+            // Setelah berhasil update, ambil ulang data terbaru dari server
+            const updatedUsersResponse = await axios.get("http://localhost:5000/api/users");
+
+            // Update state users dengan data terbaru dari server
+            setUsers(updatedUsersResponse.data);
+
+            alert("Data user berhasil diperbarui!");
+            closeModal(); // Tutup modal setelah menyimpan
+        } catch (error) {
+            console.error("Gagal memperbarui data:", error);
+            alert("Terjadi kesalahan saat memperbarui data.");
+        }
     };
 
     return (
@@ -90,7 +102,9 @@ export default function AdminUsersData() {
                             <tr>
                                 <th className="border border-gray-600 px-6 py-3">Username</th>
                                 <th className="border border-gray-600 px-6 py-3">Email</th>
+                                <th className="border border-gray-600 px-6 py-3">Jenis Kelamin</th>
                                 <th className="border border-gray-600 px-6 py-3">Alamat</th>
+                                <th className="border border-gray-600 px-6 py-3">Kota</th>
                                 <th className="border border-gray-600 px-6 py-3">Role</th>
                                 <th className="border border-gray-600 px-6 py-3">Actions</th>
                             </tr>
@@ -117,12 +131,14 @@ export default function AdminUsersData() {
                                     </td>
 
                                     <td className="border border-gray-600 px-6 py-3">{user.email}</td>
+                                    <td className="border border-gray-600 px-6 py-3">{user.gender}</td>
                                     <td className="border border-gray-600 px-6 py-3">{user.address}</td>
+                                    <td className="border border-gray-600 px-6 py-3">{user.city}</td>
                                     <td className={`border border-gray-600 px-6 py-3 font-semibold ${user.role === 'admin' ? 'text-red-500' : 'text-green-500'}`}>{user.role}</td>
 
                                     <td className="border border-gray-600 px-6 py-3">
-                                        <button onClick={() => openEditModal(user)} className="bg-green-500 text-white px-4 py-2 rounded-lg mr-2 hover:bg-green-700 transition-all">Edit</button>
-                                        <button className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-all">Delete</button>
+                                        <button onClick={() => openEditModal(user)} className="bg-[#39b151] w-20 text-[#dfeaed] py-2 rounded-lg mr-2 hover:bg-green-700 transition-all">Edit</button>
+                                        <button className="bg-[#c93434] w-20 px-4 py-2 rounded-lg hover:bg-red-700 text-[#dfeaed] transition-all">Delete</button>
                                     </td>
                                 </motion.tr>
                             ))}
@@ -134,34 +150,71 @@ export default function AdminUsersData() {
 
             {/* Modal Edit */}
             {isModalOpen && (
-                <motion.div className="fixed pt-14 inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                    <motion.div className="bg-[#14335c] p-6 rounded-lg w-96 text-white"
+                <motion.div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                    <motion.div
+                        className="bg-[#14335c] p-6 rounded-lg w-[700px] text-white max-h-[85vh] overflow-auto sm:max-h-[90vh]"
                         initial={{ opacity: 0, y: -50 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3 }}>
-                        
-                        <h2 className="text-2xl font-semibold mb-4">Edit User</h2>
 
-                        <label className="block mb-2">Username</label>
-                        <input type="text" name="username" value={formData.username} onChange={handleInputChange} className="w-full px-3 py-2 mb-3 bg-white text-black rounded-md" />
+                        <h2 className="text-2xl font-semibold mb-6">Edit User</h2>
 
-                        <label className="block mb-2">Email</label>
-                        <input type="email" name="email" value={formData.email} onChange={handleInputChange} className="w-full px-3 py-2 mb-3 bg-white text-black rounded-md" />
+                        {/* Grid lebih panjang */}
+                        <div className="grid grid-cols-2 gap-6">
 
-                        <label className="block mb-2">Alamat</label>
-                        <input type="text" name="address" value={formData.address} onChange={handleInputChange} className="w-full px-3 py-2 mb-3 bg-white text-black rounded-md" />
+                            {/* Kolom 1 */}
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block mb-2">Username</label>
+                                    <input type="text" name="username" value={formData.username} onChange={handleInputChange} className="w-full px-4 py-3 bg-white text-black rounded-md" />
+                                </div>
 
-                        <label className="block mb-2">Role</label>
-                        <select name="role" value={formData.role} onChange={handleInputChange} className="w-full px-3 py-2 mb-4 bg-white text-black rounded-md">
-                            <option value="user">costomer</option>
-                            <option value="admin">admin</option>
-                        </select>
+                                <div>
+                                    <label className="block mb-2">Email</label>
+                                    <input type="email" name="email" value={formData.email} onChange={handleInputChange} className="w-full px-4 py-3 bg-white text-black rounded-md" />
+                                </div>
 
-                        <button onClick={handleSaveChanges} className="bg-green-500 px-4 py-2 rounded-lg mr-2 hover:bg-green-700">Save</button>
-                        <button onClick={closeModal} className="bg-gray-500 px-4 py-2 rounded-lg hover:bg-gray-700">Cancel</button>
+                                <div>
+                                    <label className="block mb-2">Jenis Kelamin</label>
+                                    <select name="gender" value={formData.gender} onChange={handleInputChange} className="w-full px-4 py-3 bg-white text-black rounded-md">
+                                        <option value="Laki-laki">Laki-laki</option>
+                                        <option value="Perempuan">Perempuan</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* Kolom 2 */}
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block mb-2">Alamat</label>
+                                    <input type="text" name="address" value={formData.address} onChange={handleInputChange} className="w-full px-4 py-3 bg-white text-black rounded-md" />
+                                </div>
+
+                                <div>
+                                    <label className="block mb-2">Kota</label>
+                                    <input type="text" name="city" value={formData.city} onChange={handleInputChange} className="w-full px-4 py-3 bg-white text-black rounded-md" />
+                                </div>
+
+                                <div>
+                                    <label className="block mb-2">Role</label>
+                                    <select name="role" value={formData.role} onChange={handleInputChange} className="w-full px-4 py-3 bg-white text-black rounded-md">
+                                        <option value="admin">Admin</option>
+                                        <option value="customer">Customer</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Tombol di bawah */}
+                        <div className="flex justify-end mt-6">
+                            <button onClick={handleSaveChanges} className="bg-[#39b151] px-5 py-3 rounded-lg mr-3 hover:bg-green-700">Save</button>
+                            <button onClick={closeModal} className="bg-[#c93434] px-5 py-3 rounded-lg hover:bg-red-800">Cancel</button>
+                        </div>
+
                     </motion.div>
                 </motion.div>
             )}
+
         </div>
     );
 }

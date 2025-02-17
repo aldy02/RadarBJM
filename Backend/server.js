@@ -127,6 +127,52 @@ app.get("/api/users", (req, res) => {
     });
 });
 
+// API: Update user data (PUT)
+app.put("/api/users/:id", (req, res) => {
+    const userId = req.params.id;
+    const { email, username, gender, address, city, photo, role } = req.body;
+
+    // Validasi input
+    if (!email || !username || !gender || !address || !city || !role) {
+        return res.status(400).json({ error: "Semua field harus diisi" });
+    }
+
+    // Ambil foto lama dari database jika tidak ada foto baru yang dikirimkan
+    const getUserQuery = `SELECT photo FROM users WHERE id = ?`;
+    db.query(getUserQuery, [userId], (err, result) => {
+        if (err) {
+            console.error("Gagal mengambil data pengguna:", err);
+            return res.status(500).json({ error: "Gagal mengambil data pengguna" });
+        }
+
+        if (result.length === 0) {
+            return res.status(404).json({ error: "Pengguna tidak ditemukan" });
+        }
+
+        // Jika tidak ada foto baru, gunakan foto lama
+        const currentPhoto = photo || result[0].photo;
+
+        const updateQuery = `
+            UPDATE users
+            SET email = ?, username = ?, gender = ?, address = ?, city = ?, photo = ?, role = ?
+            WHERE id = ?
+        `;
+
+        db.query(updateQuery, [email, username, gender, address, city, currentPhoto, role, userId], (err, result) => {
+            if (err) {
+                console.error("Gagal memperbarui data pengguna:", err);
+                return res.status(500).json({ error: "Gagal memperbarui data pengguna" });
+            }
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: "Pengguna tidak ditemukan" });
+            }
+
+            res.json({ message: "Data pengguna berhasil diperbarui" });
+        });
+    });
+});
+
 // Example endpoint in Node.js (Express) to fetch orders
 app.get("/api/pesanan", (req, res) => {
     const query = "SELECT * FROM pesanan";

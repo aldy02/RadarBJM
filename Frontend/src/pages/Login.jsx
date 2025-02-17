@@ -35,7 +35,7 @@ export default function Login() {
             localStorage.setItem("user_id", decodedToken.id);  // Simpan user_id di localStorage
 
             // ✅ Cek role dan arahkan ke halaman yang sesuai
-            if (role === "admin") {
+            if (role === "Admin") {
                 navigate("/admin/users");  // Jika admin
             } else {
                 navigate("/");  // Jika customer
