@@ -1,4 +1,4 @@
-# Aplikasi Aplikasi Penjualan Ruang Iklan Di Koran RadarBJM
+# Aplikasi Penjualan Ruang Iklan Di Koran RadarBJM
 
 Aplikasi **Penjualan Ruang Iklan Di Koran RadarBJM** adalah sebuah proyek berbasis **Node.js**, **Express**, dan **React** yang memerlukan **database MySQL**. Project ini menggunakan **TailwindCSS** untuk styling dan **Framer-Motion** untuk animasi. Ikuti langkah-langkah di bawah ini untuk menjalankan aplikasi ini di lokal.
 
@@ -88,7 +88,7 @@ npm install
 npm run dev
 ```
 
-Aplikasi akan berjalan di `http://localhost:5173/` (atau port lain yang ditampilkan di terminal).
+Aplikasi akan berjalan di `http://localhost:3000/` (atau port lain yang ditampilkan di terminal).
 
 ---
 
