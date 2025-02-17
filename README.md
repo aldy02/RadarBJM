@@ -41,7 +41,6 @@ cd repository-radarbjm
 ### **2. Import Database ke phpMyAdmin**
 - Buka **XAMPP**, lalu nyalakan **Apache** dan **MySQL**.
 - Akses **phpMyAdmin** melalui browser: `http://localhost/phpmyadmin`
-- Buat database baru dengan nama **radarbjm**.
 - **Import** file database (`radarbjm.sql`) yang ada di dalam folder repository.
 
 ### **3. Jalankan Backend**
