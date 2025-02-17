@@ -173,7 +173,26 @@ app.put("/api/users/:id", (req, res) => {
     });
 });
 
-// Example endpoint in Node.js (Express) to fetch orders
+// API: Hapus pengguna berdasarkan ID
+app.delete("/api/users/:id", (req, res) => {
+    const userId = req.params.id;
+
+    const deleteQuery = "DELETE FROM users WHERE id = ?";
+    db.query(deleteQuery, [userId], (err, result) => {
+        if (err) {
+            console.error("Gagal menghapus pengguna:", err);
+            return res.status(500).json({ error: "Gagal menghapus pengguna" });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "Pengguna tidak ditemukan" });
+        }
+
+        res.json({ message: "Pengguna berhasil dihapus" });
+    });
+});
+
+// API: Get data pesanan
 app.get("/api/pesanan", (req, res) => {
     const query = "SELECT * FROM pesanan";
     db.query(query, (err, results) => {

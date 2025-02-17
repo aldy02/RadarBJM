@@ -18,16 +18,19 @@ export default function AdminUsersData() {
     });
 
     useEffect(() => {
-        axios.get("http://localhost:5000/api/users")
-            .then(response => {
-                setUsers(response.data);
-                setLoading(false);
-            })
-            .catch(error => {
-                console.error("Gagal mengambil data:", error);
-                setLoading(false);
-            });
+        fetchUsers();
     }, []);
+
+    const fetchUsers = async () => {
+        try {
+            const response = await axios.get("http://localhost:5000/api/users");
+            setUsers(response.data);
+            setLoading(false);
+        } catch (error) {
+            console.error("Gagal mengambil data:", error);
+            setLoading(false);
+        }
+    };
 
     // Fungsi untuk membuka modal edit
     const openEditModal = (user) => {
@@ -61,6 +64,7 @@ export default function AdminUsersData() {
         try {
             // Kirim perubahan ke server
             const response = await axios.put(`http://localhost:5000/api/users/${selectedUser.id}`, formData);
+            console.log(formData);
 
             // Setelah berhasil update, ambil ulang data terbaru dari server
             const updatedUsersResponse = await axios.get("http://localhost:5000/api/users");
@@ -73,6 +77,18 @@ export default function AdminUsersData() {
         } catch (error) {
             console.error("Gagal memperbarui data:", error);
             alert("Terjadi kesalahan saat memperbarui data.");
+        }
+    };
+
+    // Fungsi untuk menghapus pengguna
+    const handleDeleteUser = async (userId) => {
+        try {
+            await axios.delete(`http://localhost:5000/api/users/${userId}`);
+            setUsers(users.filter(user => user.id !== userId)); // Hapus user dari state tanpa refresh
+            alert("Pengguna berhasil dihapus.");
+        } catch (error) {
+            console.error("Gagal menghapus pengguna:", error);
+            alert("Terjadi kesalahan saat menghapus pengguna.");
         }
     };
 
@@ -92,7 +108,7 @@ export default function AdminUsersData() {
                 <p className="text-center text-lg">Loading data...</p>
             ) : (
                 <motion.div
-                    className="overflow-x-auto shadow-lg rounded-lg"
+                    className="overflow-x-auto shadow-lg rounded-lg pb-24"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}>
@@ -134,11 +150,11 @@ export default function AdminUsersData() {
                                     <td className="border border-gray-600 px-6 py-3">{user.gender}</td>
                                     <td className="border border-gray-600 px-6 py-3">{user.address}</td>
                                     <td className="border border-gray-600 px-6 py-3">{user.city}</td>
-                                    <td className={`border border-gray-600 px-6 py-3 font-semibold ${user.role === 'admin' ? 'text-red-500' : 'text-green-500'}`}>{user.role}</td>
+                                    <td className={`border border-gray-600 px-6 py-3 font-semibold ${user.role === 'Admin' ? 'text-red-500' : 'text-green-500'}`}>{user.role}</td>
 
                                     <td className="border border-gray-600 px-6 py-3">
                                         <button onClick={() => openEditModal(user)} className="bg-[#39b151] w-20 text-[#dfeaed] py-2 rounded-lg mr-2 hover:bg-green-700 transition-all">Edit</button>
-                                        <button className="bg-[#c93434] w-20 px-4 py-2 rounded-lg hover:bg-red-700 text-[#dfeaed] transition-all">Delete</button>
+                                        <button onClick={() => handleDeleteUser(user.id)} className="bg-[#c93434] w-20 px-4 py-2 rounded-lg hover:bg-red-700 text-[#dfeaed] transition-all">Delete</button>
                                     </td>
                                 </motion.tr>
                             ))}
@@ -198,8 +214,8 @@ export default function AdminUsersData() {
                                 <div>
                                     <label className="block mb-2">Role</label>
                                     <select name="role" value={formData.role} onChange={handleInputChange} className="w-full px-4 py-3 bg-white text-black rounded-md">
-                                        <option value="admin">Admin</option>
-                                        <option value="customer">Customer</option>
+                                        <option value="Admin">Admin</option>
+                                        <option value="Customer">Customer</option>
                                     </select>
                                 </div>
                             </div>
