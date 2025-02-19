@@ -4,13 +4,14 @@ import { motion } from "framer-motion";
 import Arrow from "../assets/arrow.svg";
 import axios from "axios";
 import Footer from "../components/footer";
+import { useNavigate } from "react-router-dom";
 
 export default function Iklan() {
   const [index, setIndex] = useState(0);
   const [produk, setProduk] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
+  const navigate = useNavigate();
   useEffect(() => {
     axios.get("http://localhost:5000/api/produk")
       .then((response) => {
@@ -143,7 +144,9 @@ export default function Iklan() {
                   className="w-[80%] mt-3 mb-8 bg-[#5AC9E8] hover:bg-[#7facd9] text-white font-semibold py-3 rounded transition duration-300"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ duration: 0.8, delay: 0.9 }}>
+                  transition={{ duration: 0.8, delay: 0.9 }}
+                  onClick={() => navigate("/pesan")}
+                >
                   PESAN
                 </motion.button>
               </motion.div>

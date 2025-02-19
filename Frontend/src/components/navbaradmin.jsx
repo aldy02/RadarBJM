@@ -36,10 +36,6 @@ export default function NavbarAdmin({ bgColor }) {
                         Pesanan
                         <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-[#5AC9E8] transition-all duration-300 group-hover:w-full"></span>
                     </Link> 
-                    <Link to="/admin/invoice" className="relative text-xl text-[#5AC9E8] hover:text-[#91E6FD] transition-colors group">
-                        Invoice
-                        <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-[#5AC9E8] transition-all duration-300 group-hover:w-full"></span>
-                    </Link>
                 </div>
 
                 {/* Avatar atau Login Button */}

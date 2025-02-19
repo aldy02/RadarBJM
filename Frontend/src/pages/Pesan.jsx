@@ -28,9 +28,9 @@ export default function Pesan() {
     setFormData((prev) => {
       const updatedForm = { ...prev, [name]: value };
 
-      // Jika paket atau durasi berubah, hitung ulang harga
-      if (updatedForm.paket && updatedForm.durasi) {
-        updatedForm.total_harga = hitungHarga(updatedForm.paket, updatedForm.durasi);
+      // Jika paket, ukuran, atau durasi berubah, hitung ulang harga
+      if (updatedForm.paket && updatedForm.ukuran && updatedForm.durasi) {
+        updatedForm.total_harga = hitungHarga(updatedForm.paket, updatedForm.ukuran, updatedForm.durasi);
       }
 
       return updatedForm;
@@ -38,20 +38,17 @@ export default function Pesan() {
 
     if (name === "paket") {
       let newUkuranOptions = [];
-      let newDurasiOptions = [];
+      let newDurasiOptions = ["1 Hari", "2 Hari", "3 Hari", "4 Hari", "5 Hari", "6 Hari", "7 Hari"];
 
       switch (value) {
         case "Paket A - Baris":
           newUkuranOptions = ["1 Baris", "5 Baris", "10 Baris"];
-          newDurasiOptions = ["1 Hari", "2 Hari", "3 Hari", "4 Hari", "5 Hari", "6 Hari", "7 Hari"];
           break;
         case "Paket B - Kolom":
           newUkuranOptions = ["10 CM", "20 CM", "30 CM"];
-          newDurasiOptions = ["1 Hari", "2 Hari", "3 Hari", "4 Hari", "5 Hari", "6 Hari", "7 Hari"];
           break;
         case "Paket C - Display":
           newUkuranOptions = ["1/4 Halaman", "1/2 Halaman", "1 Halaman"];
-          newDurasiOptions = ["1 Hari", "2 Hari", "3 Hari", "4 Hari", "5 Hari", "6 Hari", "7 Hari"];
           break;
         case "Paket Kombo 1 - Baris Kolom Display 1/4":
           newUkuranOptions = ["Baris Kolom Display 1/4"];
@@ -69,36 +66,65 @@ export default function Pesan() {
       setUkuranOptions(newUkuranOptions);
       setDurasiOptions(newDurasiOptions);
 
+      // Reset ukuran dan harga jika paket berubah
       setFormData((prev) => ({
         ...prev,
         ukuran: "",
         durasi: "",
-        total_harga: 0, // Reset harga jika paket berubah
+        total_harga: 0,
       }));
     }
   };
 
   // Hitung Harga
-  const hitungHarga = (paket, durasi) => {
-    const hargaPaket = {
-      "Paket A - Baris": 10000,
-      "Paket B - Kolom": 20000,
-      "Paket C - Display": 50000,
-      "Paket Kombo 1 - Baris Kolom Display 1/4": 70000,
-      "Paket Kombo 2 - Kolom Display 1/2": 90000,
-    };
+  // Fungsi untuk menghitung total harga
+  const hitungHarga = (paket, ukuran, durasi) => {
+    if (!paket || !durasi) return 0;
 
-    const hargaDurasi = {
-      "1 Hari": 1,
-      "2 Hari": 1.8,
-      "3 Hari": 2.5,
-      "4 Hari": 3,
-      "5 Hari": 3.5,
-      "6 Hari": 4,
-      "7 Hari": 4.5,
-    };
+    let hargaDasar = 0;
 
-    return hargaPaket[paket] * (hargaDurasi[durasi] || 1);
+    if (Array.isArray(hargaPaket[paket])) {
+      // Jika paket memiliki berbagai ukuran, cari harga yang sesuai
+      const paketData = hargaPaket[paket].find((item) => item.ukuran === ukuran);
+      if (paketData) hargaDasar = paketData.price;
+    } else {
+      // Untuk paket kombo, ambil harga langsung
+      hargaDasar = hargaPaket[paket] || 0;
+    }
+
+    // Hitung total berdasarkan durasi
+    return hargaDasar * (hargaDurasi[durasi] || 1);
+  };
+
+  const hargaPaket = {
+    "Paket A - Baris": [
+      { ukuran: "1 Baris", price: 100000 },
+      { ukuran: "5 Baris", price: 450000 },
+      { ukuran: "10 Baris", price: 850000 }
+    ],
+    "Paket B - Kolom": [
+      { ukuran: "10 CM", price: 1500000 },
+      { ukuran: "20 CM", price: 2800000 },
+      { ukuran: "30 CM", price: 3800000 }
+    ],
+    "Paket C - Display": [
+      { ukuran: "1/4 Halaman", price: 5000000 },
+      { ukuran: "1/2 Halaman", price: 7000000 },
+      { ukuran: "1 Halaman", price: 12000000 }
+    ],
+    "Paket Kombo 1 - Baris Kolom Display 1/4": 9000000,
+    "Paket Kombo 2 - Kolom Display 1/2": 14000000
+  };
+
+  // Faktor harga berdasarkan durasi
+  const hargaDurasi = {
+    "1 Hari": 1,
+    "2 Hari": 1.8,
+    "3 Hari": 2.5,
+    "4 Hari": 3,
+    "5 Hari": 3.5,
+    "6 Hari": 4,
+    "7 Hari": 4.5
   };
 
 

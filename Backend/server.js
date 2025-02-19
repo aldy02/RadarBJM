@@ -85,6 +85,29 @@ app.get("/api/produk", (req, res) => {
 });
 
 // API: Menyimpan Pesanan (POST)
+// app.post("/api/pesan", verifyToken, (req, res) => {
+//     const { nama, alamat, kota, kodePos, paket, ukuran, durasi, metodePembayaran, total_harga } = req.body;
+//     const user_id = req.user.id; // Ambil user_id dari token
+
+//     if (!nama || !alamat || !kota || !kodePos || !paket || !ukuran || !durasi || !metodePembayaran || !total_harga) {
+//         return res.status(400).json({ error: "Semua field harus diisi" });
+//     }
+
+//     const query = `
+//         INSERT INTO pesanan (user_id, nama, alamat, kota, kode_pos, paket, ukuran, durasi, metode_pembayaran, total_harga, status, created_at, expired_time)
+//         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW(), NOW() + INTERVAL 72 HOUR)
+//     `;
+
+//     db.query(query, [user_id, nama, alamat, kota, kodePos, paket, ukuran, durasi, metodePembayaran, total_harga], (err, result) => {
+//         if (err) {
+//             console.error("Gagal menyimpan pesanan:", err);
+//             return res.status(500).json({ error: "Gagal menyimpan pesanan" });
+//         }
+//         res.status(201).json({ message: "Pesanan berhasil dibuat", orderId: result.insertId });
+//     });
+// });
+
+// API: Menyimpan Pesanan (POST)
 app.post("/api/pesan", verifyToken, (req, res) => {
     const { nama, alamat, kota, kodePos, paket, ukuran, durasi, metodePembayaran, total_harga } = req.body;
     const user_id = req.user.id; // Ambil user_id dari token
@@ -93,19 +116,32 @@ app.post("/api/pesan", verifyToken, (req, res) => {
         return res.status(400).json({ error: "Semua field harus diisi" });
     }
 
+    // Generate Invoice ID
+    const generateInvoiceId = () => {
+        const date = new Date();
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        const randomNum = Math.floor(1000 + Math.random() * 9000); // Random 4 digit
+        return `INV-${year}${month}${day}-${randomNum}`;
+    };
+
+    const invoice_id = generateInvoiceId();
+
     const query = `
-        INSERT INTO pesanan (user_id, nama, alamat, kota, kode_pos, paket, ukuran, durasi, metode_pembayaran, total_harga, status, created_at, expired_time)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW(), NOW() + INTERVAL 72 HOUR)
+        INSERT INTO pesanan (user_id, invoice_id, nama, alamat, kota, kode_pos, paket, ukuran, durasi, metode_pembayaran, total_harga, status, created_at, expired_time)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW(), NOW() + INTERVAL 72 HOUR)
     `;
 
-    db.query(query, [user_id, nama, alamat, kota, kodePos, paket, ukuran, durasi, metodePembayaran, total_harga], (err, result) => {
+    db.query(query, [user_id, invoice_id, nama, alamat, kota, kodePos, paket, ukuran, durasi, metodePembayaran, total_harga], (err, result) => {
         if (err) {
             console.error("Gagal menyimpan pesanan:", err);
             return res.status(500).json({ error: "Gagal menyimpan pesanan" });
         }
-        res.status(201).json({ message: "Pesanan berhasil dibuat", orderId: result.insertId });
+        res.status(201).json({ message: "Pesanan berhasil dibuat", orderId: result.insertId, invoiceId: invoice_id });
     });
 });
+
 
 // API: GET semua pengguna
 app.get("/api/users", (req, res) => {

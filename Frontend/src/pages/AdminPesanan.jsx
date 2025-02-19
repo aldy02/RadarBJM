@@ -10,6 +10,10 @@ export default function AdminPesanan() {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
+        fetchOrders();
+    }, []);
+
+    const fetchOrders = () => {
         axios.get("http://localhost:5000/api/pesanan")
             .then(response => {
                 setOrders(response.data);
@@ -19,7 +23,7 @@ export default function AdminPesanan() {
                 console.error("Failed to fetch orders data:", error);
                 setLoading(false);
             });
-    }, []);
+    };
 
     const handleEditClick = (order) => {
         setEditOrder(order);
@@ -40,8 +44,8 @@ export default function AdminPesanan() {
 
         axios.put(`http://localhost:5000/api/pesanan/${editOrder.id}`, updatedData)
             .then(response => {
-                setOrders(orders.map(order =>
-                    order.id === editOrder.id ? { ...order, status: response.data.status } : order
+                setOrders(prevOrders => prevOrders.map(order =>
+                    order.id === editOrder.id ? { ...order, ...updatedData } : order
                 ));
                 setIsModalOpen(false);
             })
@@ -50,7 +54,7 @@ export default function AdminPesanan() {
                 alert("Gagal memperbarui pesanan. Silakan coba lagi.");
             });
     };
-
+    
     const handleDeleteOrder = async (orderId) => {
         if (!window.confirm("Apakah Anda yakin ingin menghapus pesanan ini?")) return;
 
@@ -82,6 +86,7 @@ export default function AdminPesanan() {
                     <table className="w-full border border-gray-600 text-[#C9E1E8] rounded-lg overflow-hidden">
                         <thead className="bg-[#14335c] text-lg">
                             <tr>
+                                <th className="border border-gray-600 px-6 py-3">Invoice ID</th>
                                 <th className="border border-gray-600 px-6 py-3">Nama</th>
                                 <th className="border border-gray-600 px-6 py-3">Alamat</th>
                                 <th className="border border-gray-600 px-6 py-3">Kota</th>
@@ -95,6 +100,7 @@ export default function AdminPesanan() {
                         <tbody>
                             {orders.map((order) => (
                                 <tr key={order.id} className="text-center bg-[#194377] hover:bg-[#0b4068] transition-all duration-300">
+                                    <td className="border border-gray-600 px-6 py-3">{order.invoice_id}</td>
                                     <td className="border border-gray-600 px-6 py-3">{order.nama}</td>
                                     <td className="border border-gray-600 px-6 py-3">{order.alamat}</td>
                                     <td className="border border-gray-600 px-6 py-3">{order.kota}</td>
@@ -103,18 +109,8 @@ export default function AdminPesanan() {
                                     <td className="border border-gray-600 px-6 py-3">{order.total_harga}</td>
                                     <td className="border border-gray-600 px-6 py-3">{order.status}</td>
                                     <td className="border border-gray-600 px-6 py-3 flex justify-center gap-2">
-                                        <button
-                                            onClick={() => handleEditClick(order)}
-                                            className="bg-[#39b151] px-5 py-3 rounded-lg hover:bg-green-700"
-                                        >
-                                            Edit
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeleteOrder(order.id)}
-                                            className="bg-[#c93434] px-5 py-3 rounded-lg hover:bg-red-800"
-                                        >
-                                            Delete
-                                        </button>
+                                        <button onClick={() => handleEditClick(order)} className="bg-[#39b151] px-5 py-3 rounded-lg hover:bg-green-700">Edit</button>
+                                        <button onClick={() => handleDeleteOrder(order.id)} className="bg-[#c93434] px-5 py-3 rounded-lg hover:bg-red-800">Delete</button>
                                     </td>
                                 </tr>
                             ))}
@@ -122,7 +118,6 @@ export default function AdminPesanan() {
                     </table>
                 </motion.div>
             )}
-
             {isModalOpen && (
                 <motion.div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
                     <motion.div className="bg-[#14335c] p-6 rounded-lg w-[700px] text-white max-h-[85vh] overflow-auto sm:max-h-[90vh]" initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
