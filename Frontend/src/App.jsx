@@ -5,6 +5,8 @@ import Iklan from './pages/Iklan.jsx';
 import Pesan from './pages/Pesan.jsx';
 import AdminUsersData from './pages/AdminUsersData.jsx';
 import AdminPesanan from './pages/AdminPesanan.jsx';
+import AdminProduk from './pages/AdminProduk.jsx'
+import AdminInvoice from './pages/AdminInvoice.jsx'
 
 function App() {
 
@@ -14,6 +16,8 @@ function App() {
       <Route path="/" element={<Home />} />
       <Route path="/admin/users" element={<AdminUsersData />} />
       <Route path="/admin/pesanan" element={<AdminPesanan />} />
+      <Route path="/admin/produk" element={<AdminProduk />} />
+      <Route path="/admin/invoice" element={<AdminInvoice />} />
       <Route path="/login" element={<Login />} />
       <Route path="/iklan" element={<Iklan />} />
       <Route path="/pesan" element={<Pesan />} />

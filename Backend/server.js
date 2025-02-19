@@ -173,6 +173,40 @@ app.put("/api/users/:id", (req, res) => {
     });
 });
 
+// API: Update data pesanan
+app.put("/api/pesanan/:id", (req, res) => {
+    const orderId = req.params.id;
+    const { nama, alamat, kota, status } = req.body;
+
+    if (!nama || !alamat || !kota || !status) {
+        return res.status(400).json({ error: "Nama, alamat, kota, dan status harus diisi" });
+    }
+
+    const validStatuses = ["pending", "paid", "canceled"];
+    if (!validStatuses.includes(status)) {
+        return res.status(400).json({ error: "Status tidak valid" });
+    }
+
+    const updateQuery = `
+        UPDATE pesanan
+        SET nama = ?, alamat = ?, kota = ?, status = ?
+        WHERE id = ?
+    `;
+
+    db.query(updateQuery, [nama, alamat, kota, status, orderId], (err, result) => {
+        if (err) {
+            console.error("Gagal memperbarui pesanan:", err);
+            return res.status(500).json({ error: "Gagal memperbarui pesanan" });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "Pesanan tidak ditemukan" });
+        }
+
+        res.json({ message: "Pesanan berhasil diperbarui", status });
+    });
+});
+
 // API: Hapus pengguna berdasarkan ID
 app.delete("/api/users/:id", (req, res) => {
     const userId = req.params.id;
@@ -202,6 +236,92 @@ app.get("/api/pesanan", (req, res) => {
         res.json(results);
     });
 });
+
+// API: Hapus pesanan berdasarkan ID
+app.delete("/api/pesanan/:id", (req, res) => {
+    const orderId = req.params.id;
+
+    const deleteQuery = "DELETE FROM pesanan WHERE id = ?";
+    db.query(deleteQuery, [orderId], (err, result) => {
+        if (err) {
+            console.error("Gagal menghapus pesanan:", err);
+            return res.status(500).json({ error: "Gagal menghapus pesanan" });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "Pesanan tidak ditemukan" });
+        }
+
+        res.json({ message: "Pesanan berhasil dihapus" });
+    });
+});
+
+// API: Get produk data untuk admin
+app.get("/api/produk", (req, res) => {
+    const query = "SELECT * FROM produk_iklan";
+    db.query(query, (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: "Gagal mengambil data" });
+        }
+
+        const parsedResults = results.map(item => ({
+            ...item,
+            harga: item.harga ? JSON.parse(item.harga) : item.harga
+        }));
+
+        res.json(parsedResults);
+    });
+});
+
+// API: Edit produk tanpa mengubah harga
+app.put("/api/produk/:id", (req, res) => {
+    const produkId = req.params.id;
+    const { paket, tipe, durasi } = req.body;
+
+    if (!paket || !tipe || !durasi) {
+        return res.status(400).json({ error: "Semua field harus diisi" });
+    }
+
+    const updateQuery = `
+        UPDATE produk_iklan 
+        SET paket = ?, tipe = ?, durasi = ?
+        WHERE id = ?
+    `;
+
+    db.query(updateQuery, [paket, tipe, durasi, produkId], (err, result) => {
+        if (err) {
+            console.error("Gagal mengupdate produk:", err);
+            return res.status(500).json({ error: "Gagal mengupdate produk" });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "Produk tidak ditemukan" });
+        }
+
+        res.json({ message: "Produk berhasil diperbarui" });
+    });
+});
+
+// API: Hapus produk berdasarkan ID
+app.delete("/api/produk/:id", (req, res) => {
+    const produkId = req.params.id;
+
+    const deleteQuery = "DELETE FROM produk_iklan WHERE id = ?";
+
+    db.query(deleteQuery, [produkId], (err, result) => {
+        if (err) {
+            console.error("Gagal menghapus produk:", err);
+            return res.status(500).json({ error: "Gagal menghapus produk" });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "Produk tidak ditemukan" });
+        }
+
+        res.json({ message: "Produk berhasil dihapus" });
+    });
+});
+
 
 // Start server
 app.listen(PORT, () => {
