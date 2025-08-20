@@ -101,7 +101,7 @@ export default function AdminUsersData() {
                 initial={{ y: -70, opacity: 0 }}
                 transition={{ duration: 1, ease: "easeOut", delay: 0.6 }}
                 viewport={{ once: false, amount: 0.3 }}>
-                PRODUK KAMI
+                Data User
             </motion.h1>
 
             {loading ? (
